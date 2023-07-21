@@ -1,10 +1,11 @@
 import { Platform, StyleSheet } from 'react-native';
-import constants from './constants';
 
-export default StyleSheet.create({
+const createStyles = (daySize, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius ) =>
+{
+StyleSheet.create({
   singleContainer: {
-    height: constants.DAY_SIZE,
-    width: constants.DAY_SIZE,
+    height: daySize,
+    width: daySize,
     padding: 10,
     shadowOpacity: Platform.OS === 'web' ? 0 : 0.18,
     shadowRadius: 4,
@@ -15,9 +16,9 @@ export default StyleSheet.create({
     elevation: 6,
   },
   singleDateBox: {
-    borderRadius: constants.BORDER_RADIUS,
+    borderRadius: borderRadius,
     overflow: 'hidden',
-    backgroundColor: constants.CALENDAR_BACKGROUND_COLOR,
+    backgroundColor: calendarBackgroundColor,
     height: 100,
     width: 100,
     flexDirection: 'column',
@@ -40,14 +41,14 @@ export default StyleSheet.create({
     elevation: 6,
   },
   closed: {
-    color: constants.MONTH_BACKGROUND_COLOR_DISABLED,
+    color: monthBackgroundColorDisabled,
   },
   monthContainerClosed: {
-    backgroundColor: constants.MONTH_BACKGROUND_COLOR_DISABLED,
+    backgroundColor: monthBackgroundColorDisabled,
   },
   monthContainer: {
     height: 25,
-    backgroundColor: constants.MONTH_BACKGROUND_COLOR,
+    backgroundColor: monthBackgroundColor,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -73,9 +74,11 @@ export default StyleSheet.create({
     color: '#000',
   },
   arrow: {
-    height: constants.DAY_SIZE,
+    height: daySize,
     width: 36,
     justifyContent: 'center',
     alignItems: 'center'
   },
 });
+}
+export default createStyles;

@@ -45,6 +45,8 @@ All parameters for components are optional
   firstDate={"2019-07-05"}
   // Last day. You can set number of days instead
   lastDate={"2019-07-20"}
+  // List of dates. You can set an array of days 
+  listOfDates={["2019-07-20", "2019-07-23", "2019-07-25"]}
   // Sets number of days displaued. Default = 30
   numberOfDays={60}
   // Initial selected day. Default = firstDate
@@ -57,6 +59,8 @@ All parameters for components are optional
   daysInView={3}
   // Only available if width % 120 = 0. Scroll by full width
   paginate={true}
+  // Size of height between elements of list
+  daySize={120}
   // Array of disabled dates. Default [] 
   disabledDates={['2019-07-11', '2019-07-12', '2019-07-15']}
   // Function to get selected date in 'YYYY-MM-DD' format

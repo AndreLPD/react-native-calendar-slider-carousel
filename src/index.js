@@ -2,8 +2,7 @@ import React from 'react';
 import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import moment from 'moment';
-import style from './style';
-import constants from './constants';
+import createStyles from './style';
 
 export default class CalendarDays extends React.Component {
   constructor(props) {
@@ -15,10 +14,12 @@ export default class CalendarDays extends React.Component {
   }
 
   componentDidMount() {
-    const { firstDate, selectedDate } = this.props;
+    const { firstDate, selectedDate, listOfDates = [], daySize=120, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius, style={} } = this.props;
+    const styles = createStyles(daySize, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius);
 
     const first = firstDate ? moment(firstDate) : moment(new Date());
     const selected = selectedDate ? moment(selectedDate) : first;
+    const list = listOfDates;
 
     const selectedDayIndex = moment.duration(selected.diff(first)).asDays();
 
@@ -32,17 +33,17 @@ export default class CalendarDays extends React.Component {
   }
 
   setScrollOffset = (index) => {
-    const { showArrows } = this.props;
+    const { showArrows, daySize } = this.props;
     if (this.scrollView) {
       const { width, daysInView } = this.props;
 
-      let scrollViewWidth = constants.DAY_SIZE;
+      let scrollViewWidth = daySize;
       if (width || daysInView) {
-        scrollViewWidth = width || daysInView * constants.DAY_SIZE;
+        scrollViewWidth = width || daysInView * daySize;
       }
-      const xOffset = constants.DAY_SIZE * index
-        + (constants.DAY_SIZE - scrollViewWidth) / 2
-        + (scrollViewWidth % constants.DAY_SIZE) / 2;
+      const xOffset = daySize * index
+        + (daySize - scrollViewWidth) / 2
+        + (scrollViewWidth % daySize) / 2;
 
       const scrollOffset = { x: xOffset, animated: true };
 
@@ -53,11 +54,12 @@ export default class CalendarDays extends React.Component {
   scroll = (direction) => {
     if (this.scrollView) {
       const { scrollPosition } = this.state;
+      const {  daySize } = this.props;
       let newPosition = 0;
       if (direction === 'left') {
-        newPosition = Math.max(scrollPosition - constants.DAY_SIZE, 0);
+        newPosition = Math.max(scrollPosition - daySize, 0);
       } else {
-        newPosition = scrollPosition + constants.DAY_SIZE;
+        newPosition = scrollPosition + daySize;
       }
 
       this.setState({
@@ -119,6 +121,7 @@ export default class CalendarDays extends React.Component {
       disabledText,
       daysInView,
       disabledDates,
+      daySize,
       width,
       paginate,
       showArrows,
@@ -130,7 +133,7 @@ export default class CalendarDays extends React.Component {
     if (width) {
       scrollWidth = width;
     } else if (daysInView) {
-      scrollWidth = daysInView * constants.DAY_SIZE;
+      scrollWidth = daysInView * daySize;
     }
 
     const daysProps = {
@@ -160,16 +163,16 @@ export default class CalendarDays extends React.Component {
             onPress={() => this.dateSelect({ key, date: availableDates[key].date })
             }
           >
-            <View style={[style.singleContainer, Platform.OS !== 'web' ? selectedStyle : null]}>
-              <View style={[style.singleDateBox, selectedStyle]}>
-                <View style={[style.monthContainer, isClosedMonthStyle]}>
-                  <Text style={style.monthText}>{val.month}</Text>
+            <View style={[styles.singleContainer, Platform.OS !== 'web' ? selectedStyle : null]}>
+              <View style={[styles.singleDateBox, selectedStyle]}>
+                <View style={[styles.monthContainer, isClosedMonthStyle]}>
+                  <Text style={styles.monthText}>{val.month}</Text>
                 </View>
-                <View style={style.dateContainer}>
-                  <Text style={[style.dateText, isClosedStyle]}>{val.day}</Text>
+                <View style={styles.dateContainer}>
+                  <Text style={[styles.dateText, isClosedStyle]}>{val.day}</Text>
                 </View>
-                <View style={style.dayContainer}>
-                  <Text style={[style.dayText, isClosedStyle]}>
+                <View style={styles.dayContainer}>
+                  <Text style={[styles.dayText, isClosedStyle]}>
                     {val.disabled && disabledText
                       ? daysProps.disabledText
                       : val.day_of_week}
@@ -183,7 +186,7 @@ export default class CalendarDays extends React.Component {
     }
 
     return (
-      <View style={{ height: constants.DAY_SIZE, width: scrollWidth, flexDirection: 'row' }}>
+      <View style={{ height: this.props.daySize, width: scrollWidth, flexDirection: 'row' }}>
         {showArrows ?
           <TouchableOpacity style={style.arrow} onPress={() => this.scroll('left')}>
             {leftArrow}
@@ -196,14 +199,14 @@ export default class CalendarDays extends React.Component {
           scrollEnabled={!showArrows}
           horizontal
           snapToInterval={
-            paginate && scrollWidth % constants.DAY_SIZE === 0
+            paginate && scrollWidth % this.props.daySize === 0
               ? scrollWidth
-              : constants.DAY_SIZE
+              : this.props.daySize
           }
           decelerationRate="fast"
           showsHorizontalScrollIndicator={false}
         >
-          <View style={{ width: (scrollWidth % constants.DAY_SIZE) / 2 }}/>
+          <View style={{ width: (scrollWidth % this.props.daySize) / 2 }}/>
           {days || null}
         </ScrollView>
         {showArrows ?
