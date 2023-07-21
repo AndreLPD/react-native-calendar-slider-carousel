@@ -1,8 +1,8 @@
 import React from 'react';
-import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import moment from 'moment';
-import createStyles from './style';
+// import {createStyles as styles} from './style';
 
 export default class CalendarDays extends React.Component {
   constructor(props) {
@@ -14,8 +14,9 @@ export default class CalendarDays extends React.Component {
   }
 
   componentDidMount() {
-    const { firstDate, selectedDate, listOfDates = [], daySize=120, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius, style={} } = this.props;
-    const styles = createStyles(daySize, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius);
+    const { firstDate, selectedDate, listOfDates = [], daySize=120, monthBackgroundColor="#14B988", monthBackgroundColorDisabled="#f8443b", calendarBackgroundColor="#fff", borderRadius=10, style={} } = this.props;
+    console.log(this.props);
+    // const styles = createStyles(daySize, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius);
 
     const first = firstDate ? moment(firstDate) : moment(new Date());
     const selected = selectedDate ? moment(selectedDate) : first;
@@ -148,13 +149,13 @@ export default class CalendarDays extends React.Component {
 
     if (availableDates) {
       days = availableDates.map((val, key) => {
-        const isClosedStyle = val.open ? null : style.closed;
+        const isClosedStyle = val.open ? null : styles.closed;
 
         const isClosedMonthStyle = val.disabled
-          ? style.monthContainerClosed
+          ? styles.monthContainerClosed
           : null;
 
-        const selectedStyle = selectedDayIndex === key ? style.singleContainerSelected : null;
+        const selectedStyle = selectedDayIndex === key ? styles.singleContainerSelected : null;
 
         return (
           <TouchableOpacity
@@ -188,7 +189,7 @@ export default class CalendarDays extends React.Component {
     return (
       <View style={{ height: this.props.daySize, width: scrollWidth, flexDirection: 'row' }}>
         {showArrows ?
-          <TouchableOpacity style={style.arrow} onPress={() => this.scroll('left')}>
+          <TouchableOpacity style={styles.arrow} onPress={() => this.scroll('left')}>
             {leftArrow}
           </TouchableOpacity>
           : null}
@@ -210,7 +211,7 @@ export default class CalendarDays extends React.Component {
           {days || null}
         </ScrollView>
         {showArrows ?
-          <TouchableOpacity style={style.arrow} onPress={() => this.scroll('right')}>
+          <TouchableOpacity style={styles.arrow} onPress={() => this.scroll('right')}>
             {rightArrow}
           </TouchableOpacity>
           : null}
@@ -218,3 +219,82 @@ export default class CalendarDays extends React.Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  singleContainer: {
+    height: 120,
+    width: 120,
+    padding: 10,
+    shadowOpacity: Platform.OS === 'web' ? 0 : 0.18,
+    shadowRadius: 4,
+    shadowOffset: {
+      height: 0,
+      width: 0,
+    },
+    elevation: 6,
+  },
+  singleDateBox: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    height: 100,
+    width: 100,
+    flexDirection: 'column',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: {
+      height: 0,
+      width: 0,
+    },
+    elevation: 6,
+    zIndex: 3,
+  },
+  singleContainerSelected: {
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: {
+      height: 2,
+      width: 2,
+    },
+    elevation: 6,
+  },
+  closed: {
+    color: '#14B988',
+  },
+  monthContainerClosed: {
+    backgroundColor: '#14B988',
+  },
+  monthContainer: {
+    height: 25,
+    backgroundColor: '#f8443b',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  monthText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#fff',
+  },
+  dateContainer: {
+    height: 50,
+  },
+  dateText: {
+    marginTop: Platform.OS === 'ios' ? 4 : 0,
+    fontSize: 38,
+    textAlign: 'center',
+  },
+  dayContainer: {
+    height: 25,
+  },
+  dayText: {
+    fontSize: Platform.OS === 'ios' ? 16 : 15,
+    textAlign: 'center',
+    color: '#000',
+  },
+  arrow: {
+    height: 120,
+    width: 36,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+});
