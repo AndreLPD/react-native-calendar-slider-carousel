@@ -2,7 +2,9 @@ import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import moment from 'moment';
-// import {createStyles as styles} from './style';
+import 'moment/locale/pt-br';
+import style from './style';
+import constants from './constants';
 
 export default class CalendarDays extends React.Component {
   constructor(props) {
@@ -14,15 +16,14 @@ export default class CalendarDays extends React.Component {
   }
 
   componentDidMount() {
-    const { firstDate, selectedDate, listOfDates = [], daySize=120, monthBackgroundColor="#14B988", monthBackgroundColorDisabled="#f8443b", calendarBackgroundColor="#fff", borderRadius=10, style={} } = this.props;
-    console.log(this.props);
-    // const styles = createStyles(daySize, monthBackgroundColor, monthBackgroundColorDisabled, calendarBackgroundColor, borderRadius);
+    const { firstDate, selectedDate, listDate = [] } = this.props;
 
-    const first = firstDate ? moment(firstDate) : moment(new Date());
-    const selected = selectedDate ? moment(selectedDate) : first;
-    const list = listOfDates;
+    // const date = moment(listDate)
+    // console.log('first',date);
+    // const first = firstDate ? moment(firstDate) : moment(listDate);
+    // const selected = selectedDate ? moment(selectedDate) : first;
 
-    const selectedDayIndex = moment.duration(selected.diff(first)).asDays();
+    const selectedDayIndex = listDate;
 
     this.setState({
       selectedDayIndex,
@@ -34,17 +35,17 @@ export default class CalendarDays extends React.Component {
   }
 
   setScrollOffset = (index) => {
-    const { showArrows, daySize } = this.props;
+    const { showArrows } = this.props;
     if (this.scrollView) {
       const { width, daysInView } = this.props;
 
-      let scrollViewWidth = daySize;
+      let scrollViewWidth = constants.DAY_SIZE;
       if (width || daysInView) {
-        scrollViewWidth = width || daysInView * daySize;
+        scrollViewWidth = width || daysInView * constants.DAY_SIZE;
       }
-      const xOffset = daySize * index
-        + (daySize - scrollViewWidth) / 2
-        + (scrollViewWidth % daySize) / 2;
+      const xOffset = constants.DAY_SIZE * index
+        + (constants.DAY_SIZE - scrollViewWidth) / 2
+        + (scrollViewWidth % constants.DAY_SIZE) / 2;
 
       const scrollOffset = { x: xOffset, animated: true };
 
@@ -55,12 +56,11 @@ export default class CalendarDays extends React.Component {
   scroll = (direction) => {
     if (this.scrollView) {
       const { scrollPosition } = this.state;
-      const {  daySize } = this.props;
       let newPosition = 0;
       if (direction === 'left') {
-        newPosition = Math.max(scrollPosition - daySize, 0);
+        newPosition = Math.max(scrollPosition - constants.DAY_SIZE, 0);
       } else {
-        newPosition = scrollPosition + daySize;
+        newPosition = scrollPosition + constants.DAY_SIZE;
       }
 
       this.setState({
@@ -84,31 +84,33 @@ export default class CalendarDays extends React.Component {
   };
 
   generateDates = (props) => {
-    const date = moment(props.firstDate);
+    // const listDate = moment(props.listDate);
     const disabledDates = props.disabledDates ? props.disabledDates : [];
 
-    const first = props.firstDate
-      ? moment(props.firstDate)
-      : moment(new Date());
-    const last = props.lastDate ? moment(props.lastDate) : null;
+    // const first = props.firstDate
+    //   ? moment(props.firstDate)
+    //   : moment(new Date());
+    // const last = props.lastDate ? moment(props.lastDate) : null;
 
-    const numberOfDays = last
-      ? moment.duration(last.diff(first)).asDays() + 1
-      : props.numberOfDays;
+    // const numberOfDays = last
+    //   ? moment.duration(last.diff(first)).asDays() + 1
+    //   : props.numberOfDays;
 
-    const dates = [];
-    for (let i = 0; i < numberOfDays; i += 1) {
-      const isDisabled = !!disabledDates.includes(date.format('YYYY-MM-DD'));
-
-      dates.push({
-        date: date.format('YYYY-MM-DD'),
-        day: date.format('D'),
-        day_of_week: date.format('dddd'),
-        month: date.format('MMMM'),
+    // const dates = [];
+    const {listDate} = this.props;
+    const dates = listDate.map((date) => {
+      const momentDate = moment(date);
+      const isDisabled = !!disabledDates.includes(momentDate.format('YYYY-MM-DD'));
+  
+      return {
+        date: momentDate.format('YYYY-MM-DD'),
+        day: momentDate.format('D'),
+        day_of_week: momentDate.format('dddd'),
+        month: momentDate.format('MMMM'),
         disabled: isDisabled,
-      });
-      date.add(1, 'days');
-    }
+      };
+    });
+  
     return dates;
   };
 
@@ -118,11 +120,11 @@ export default class CalendarDays extends React.Component {
     const {
       firstDate,
       lastDate,
+      listDate, 
       numberOfDays,
       disabledText,
       daysInView,
       disabledDates,
-      daySize,
       width,
       paginate,
       showArrows,
@@ -134,7 +136,7 @@ export default class CalendarDays extends React.Component {
     if (width) {
       scrollWidth = width;
     } else if (daysInView) {
-      scrollWidth = daysInView * daySize;
+      scrollWidth = daysInView * constants.DAY_SIZE;
     }
 
     const daysProps = {
@@ -149,13 +151,13 @@ export default class CalendarDays extends React.Component {
 
     if (availableDates) {
       days = availableDates.map((val, key) => {
-        const isClosedStyle = val.open ? null : styles.closed;
+        const isClosedStyle = val.open ? null : style.closed;
 
         const isClosedMonthStyle = val.disabled
-          ? styles.monthContainerClosed
+          ? style.monthContainerClosed
           : null;
 
-        const selectedStyle = selectedDayIndex === key ? styles.singleContainerSelected : null;
+        const selectedStyle = selectedDayIndex === key ? style.singleContainerSelected : null;
 
         return (
           <TouchableOpacity
@@ -164,16 +166,16 @@ export default class CalendarDays extends React.Component {
             onPress={() => this.dateSelect({ key, date: availableDates[key].date })
             }
           >
-            <View style={[styles.singleContainer, Platform.OS !== 'web' ? selectedStyle : null]}>
-              <View style={[styles.singleDateBox, selectedStyle]}>
-                <View style={[styles.monthContainer, isClosedMonthStyle]}>
-                  <Text style={styles.monthText}>{val.month}</Text>
+            <View style={[style.singleContainer,  Platform.OS !== 'web' ? selectedStyle : null]}>
+              <View style={[style.singleDateBox, selectedStyle]}>
+                <View style={[style.monthContainer, isClosedMonthStyle]}>
+                  <Text style={style.monthText}>{val.month}</Text>
                 </View>
-                <View style={styles.dateContainer}>
-                  <Text style={[styles.dateText, isClosedStyle]}>{val.day}</Text>
+                <View style={style.dateContainer}>
+                  <Text style={[style.dateText, isClosedStyle]}>{val.day}</Text>
                 </View>
-                <View style={styles.dayContainer}>
-                  <Text style={[styles.dayText, isClosedStyle]}>
+                <View style={style.dayContainer}>
+                  <Text style={[style.dayText, isClosedStyle]}>
                     {val.disabled && disabledText
                       ? daysProps.disabledText
                       : val.day_of_week}
@@ -187,9 +189,9 @@ export default class CalendarDays extends React.Component {
     }
 
     return (
-      <View style={{ height: this.props.daySize, width: scrollWidth, flexDirection: 'row' }}>
+      <View style={{ height: constants.DAY_SIZE, width: scrollWidth, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
         {showArrows ?
-          <TouchableOpacity style={styles.arrow} onPress={() => this.scroll('left')}>
+          <TouchableOpacity style={style.arrow} onPress={() => this.scroll('left')}>
             {leftArrow}
           </TouchableOpacity>
           : null}
@@ -198,20 +200,21 @@ export default class CalendarDays extends React.Component {
             this.scrollView = scrollView;
           }}
           scrollEnabled={!showArrows}
+          contentContainerStyle={{ alignItems: 'center' }}
           horizontal
           snapToInterval={
-            paginate && scrollWidth % this.props.daySize === 0
+            paginate && scrollWidth % constants.DAY_SIZE === 0
               ? scrollWidth
-              : this.props.daySize
+              : constants.DAY_SIZE
           }
           decelerationRate="fast"
           showsHorizontalScrollIndicator={false}
         >
-          <View style={{ width: (scrollWidth % this.props.daySize) / 2 }}/>
+          <View style={{ width: (scrollWidth % constants.DAY_SIZE) / 2 }}/>
           {days || null}
         </ScrollView>
         {showArrows ?
-          <TouchableOpacity style={styles.arrow} onPress={() => this.scroll('right')}>
+          <TouchableOpacity style={style.arrow} onPress={() => this.scroll('right')}>
             {rightArrow}
           </TouchableOpacity>
           : null}
@@ -219,82 +222,3 @@ export default class CalendarDays extends React.Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  singleContainer: {
-    height: 120,
-    width: 120,
-    padding: 10,
-    shadowOpacity: Platform.OS === 'web' ? 0 : 0.18,
-    shadowRadius: 4,
-    shadowOffset: {
-      height: 0,
-      width: 0,
-    },
-    elevation: 6,
-  },
-  singleDateBox: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-    height: 100,
-    width: 100,
-    flexDirection: 'column',
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    shadowOffset: {
-      height: 0,
-      width: 0,
-    },
-    elevation: 6,
-    zIndex: 3,
-  },
-  singleContainerSelected: {
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    shadowOffset: {
-      height: 2,
-      width: 2,
-    },
-    elevation: 6,
-  },
-  closed: {
-    color: '#14B988',
-  },
-  monthContainerClosed: {
-    backgroundColor: '#14B988',
-  },
-  monthContainer: {
-    height: 25,
-    backgroundColor: '#f8443b',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  monthText: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#fff',
-  },
-  dateContainer: {
-    height: 50,
-  },
-  dateText: {
-    marginTop: Platform.OS === 'ios' ? 4 : 0,
-    fontSize: 38,
-    textAlign: 'center',
-  },
-  dayContainer: {
-    height: 25,
-  },
-  dayText: {
-    fontSize: Platform.OS === 'ios' ? 16 : 15,
-    textAlign: 'center',
-    color: '#000',
-  },
-  arrow: {
-    height: 120,
-    width: 36,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-});
